@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [ $1 == 'get-item' ] 
+  then
+    GOPASS=$(command -v gopass) || exit 1
+    echo $($GOPASS ls --flat | rofi -dmenu -i -theme ~/.config/rofi/rofi-gopass.rasi) > /dev/shm/dmenu-pass
+    exit 0
+fi
+
+ITEM=$(cat /dev/shm/dmenu-pass)
+
+case $1 in
+
+  url)
+    echo $ITEM | xargs --no-run-if-empty -- bash -c 'gopass show -f $0 url' | head -n 1 | xdotool type --clearmodifiers --file -
+    exit 0
+    ;;
+
+  username)
+    echo $ITEM | xargs --no-run-if-empty -- bash -c 'gopass show -f $0 username' | head -n 1 | xdotool type --clearmodifiers --file -
+    exit 0
+    ;;
+
+  pass)
+    echo $ITEM | xargs --no-run-if-empty gopass show -o | xdotool type --clearmodifiers --file - 
+    exit 0
+    ;;
+ 
+  entry)
+    echo $ITEM | sed 's!.*/!!' | tr -d '\n' | xdotool type --clearmodifiers --file -
+    exit 0
+    ;;
+ 
+  clipboard)
+    echo $ITEM | xargs --no-run-if-empty gopass show -c
+    exit 0
+    ;;
+
+esac
